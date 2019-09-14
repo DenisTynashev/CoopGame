@@ -7,6 +7,14 @@
 #include "Kismet/GameplayStatics.h"
 #include "Components/SkeletalMeshComponent.h"
 #include "Particles/ParticleSystemComponent.h"
+#include "IConsoleManager.h"
+
+static int32 DebugWeapoDrawing = 0;
+FAutoConsoleVariableRef CVARDebugWeapoDrawing(
+	TEXT("COOP.DebugWeapons"), 
+	DebugWeapoDrawing,
+	TEXT("Draw debug lines for Weapons"), 
+	EConsoleVariableFlags::ECVF_Cheat);
 
 // Sets default values
 ASWeapon::ASWeapon()
@@ -59,7 +67,10 @@ void ASWeapon::Fire()
 		}		
 		TraceEnd = Hit.ImpactPoint;
 	}
-	//DrawDebugLine(GetWorld(), OutEyeLocation, TraceEnd, FColor::White, false, 1.0f, 0, 1.0f);
+	if (DebugWeapoDrawing)
+	{
+		DrawDebugLine(GetWorld(), OutEyeLocation, TraceEnd, FColor::White, false, 1.0f, 0, 1.0f);
+	}	
 	if(MuzzleEffect)
 	{
 		UGameplayStatics::SpawnEmitterAttached(MuzzleEffect, MeshComp, MuzzleSocketName);

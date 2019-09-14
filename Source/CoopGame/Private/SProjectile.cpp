@@ -27,7 +27,6 @@ ASProjectile::ASProjectile()
 	ProjectileMovement->bShouldBounce = false;
 
 	// Die after 3 seconds by default
-	//SetLifeSpan(1.f);
 	InitialLifeSpan = 1.f;
 	//Default values for grenade
 	DamageRadius = 25.f;

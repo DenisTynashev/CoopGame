@@ -26,13 +26,16 @@ ASCharacter::ASCharacter()
 	//FVector NewLocation = GetActorLocation();
 	//CurrentWeapon = GetWorld()->SpawnActor<ASWeapon>(GetClass(), NewLocation, FRotator::ZeroRotator);
 	//CurrentWeapon
-
+	ZoomedFOV = 65.f;
+	ZoomInterpSpeed = 20.f;
 }
 
 // Called when the game starts or when spawned
 void ASCharacter::BeginPlay()
 {
 	Super::BeginPlay();
+	
+	DeafaultFOV = CameraComp->FieldOfView;
 	
 }
 
@@ -66,10 +69,23 @@ void ASCharacter::ChangeWeapon()
 	UE_LOG(LogTemp, Warning, TEXT("Change Weapon!"));
 }
 
+void ASCharacter::BeginZoom()
+{
+	bWantsToZoom = true;
+}
+
+void ASCharacter::EndZoom()
+{
+	bWantsToZoom = false;
+}
+
 // Called every frame
 void ASCharacter::Tick(float DeltaTime)
 {
 	Super::Tick(DeltaTime);
+	float TargetFOV = bWantsToZoom ? ZoomedFOV : DeafaultFOV;
+	float NewFOV = FMath::FInterpTo(CameraComp->FieldOfView, TargetFOV, DeltaTime, ZoomInterpSpeed);
+	CameraComp->SetFieldOfView(NewFOV);
 
 }
 
@@ -89,6 +105,9 @@ void ASCharacter::SetupPlayerInputComponent(UInputComponent* PlayerInputComponen
 	PlayerInputComponent->BindAction("Jump", EInputEvent::IE_Pressed, this, &ASCharacter::DoJump);
 
 	PlayerInputComponent->BindAction("ChangeWeapon", EInputEvent::IE_Pressed, this, &ASCharacter::ChangeWeapon);
+
+	PlayerInputComponent->BindAction("Zoom", EInputEvent::IE_Pressed, this, &ASCharacter::BeginZoom);
+	PlayerInputComponent->BindAction("Zoom", EInputEvent::IE_Released, this, &ASCharacter::EndZoom);
 }
 
 FVector ASCharacter::GetPawnViewLocation() const

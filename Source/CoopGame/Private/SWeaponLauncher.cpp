@@ -19,13 +19,17 @@ void ASWeaponLauncher::Fire()
 	AActor* MyOwner = GetOwner();
 	if (!MyOwner) { return; }
 	UE_LOG(LogTemp, Warning, TEXT("Grenade firing!"));
+	FVector OutEyeLocation;
+	FRotator OutEyeRotation;
+	MyOwner->GetActorEyesViewPoint(OutEyeLocation, OutEyeRotation);
 
 	FVector MuzzleLocation = MeshComp->GetSocketLocation(MuzzleSocketName);
 	FRotator MuzzleRotation = MeshComp->GetSocketRotation(MuzzleSocketName);
 	FActorSpawnParameters SpawnParameters;
-	SpawnParameters.SpawnCollisionHandlingOverride = ESpawnActorCollisionHandlingMethod::AdjustIfPossibleButDontSpawnIfColliding;
+	//SpawnParameters.SpawnCollisionHandlingOverride = ESpawnActorCollisionHandlingMethod::AdjustIfPossibleButDontSpawnIfColliding; -> My variant
+	SpawnParameters.SpawnCollisionHandlingOverride = ESpawnActorCollisionHandlingMethod::AlwaysSpawn;
 	//SpawnParameters.Instigator = MyOwner;
-	GetWorld()->SpawnActor<ASProjectile>(ProjectileClass, MuzzleLocation, MuzzleRotation, SpawnParameters);
+	GetWorld()->SpawnActor<ASProjectile>(ProjectileClass, MuzzleLocation, OutEyeRotation, SpawnParameters);
 	if (MuzzleEffect)
 	{
 		UGameplayStatics::SpawnEmitterAttached(MuzzleEffect, MeshComp, MuzzleSocketName);
