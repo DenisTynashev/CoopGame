@@ -6,6 +6,7 @@
 #include "Camera/CameraComponent.h"
 #include "GameFramework/SpringArmComponent.h"
 #include "GameFramework/PawnMovementComponent.h"
+#include "Engine/World.h"
 
 // Sets default values
 ASCharacter::ASCharacter()
@@ -21,6 +22,10 @@ ASCharacter::ASCharacter()
 	GetMovementComponent()->GetNavAgentPropertiesRef().bCanCrouch = true;
 	GetMovementComponent()->GetNavAgentPropertiesRef().bCanJump = true;
 	GetMovementComponent()->SetJumpAllowed(true);
+	//Spawn default weapon
+	//FVector NewLocation = GetActorLocation();
+	//CurrentWeapon = GetWorld()->SpawnActor<ASWeapon>(GetClass(), NewLocation, FRotator::ZeroRotator);
+	//CurrentWeapon
 
 }
 
@@ -56,6 +61,11 @@ void ASCharacter::DoJump()
 	Jump();
 }
 
+void ASCharacter::ChangeWeapon()
+{
+	UE_LOG(LogTemp, Warning, TEXT("Change Weapon!"));
+}
+
 // Called every frame
 void ASCharacter::Tick(float DeltaTime)
 {
@@ -77,6 +87,8 @@ void ASCharacter::SetupPlayerInputComponent(UInputComponent* PlayerInputComponen
 	PlayerInputComponent->BindAction("Crouch", EInputEvent::IE_Released, this, &ASCharacter::EndCrouch);
 
 	PlayerInputComponent->BindAction("Jump", EInputEvent::IE_Pressed, this, &ASCharacter::DoJump);
+
+	PlayerInputComponent->BindAction("ChangeWeapon", EInputEvent::IE_Pressed, this, &ASCharacter::ChangeWeapon);
 }
 
 FVector ASCharacter::GetPawnViewLocation() const

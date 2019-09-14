@@ -8,6 +8,7 @@
 
 class UCameraComponent;
 class USpringArmComponent;
+class ASWeapon;
 
 UCLASS()
 class COOPGAME_API ASCharacter : public ACharacter
@@ -32,11 +33,16 @@ protected:
 
 	void DoJump();
 
+	void ChangeWeapon();
+
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly,Category = "Components")
 	UCameraComponent* CameraComp;
 
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Components")
 	USpringArmComponent* SpringArmComp;
+
+	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "Weapon")
+	TSubclassOf<ASWeapon> CurrentWeapon;
 
 public:	
 	// Called every frame
