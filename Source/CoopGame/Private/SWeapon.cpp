@@ -8,6 +8,7 @@
 #include "Components/SkeletalMeshComponent.h"
 #include "Particles/ParticleSystemComponent.h"
 #include "IConsoleManager.h"
+#include "UObject/ConstructorHelpers.h"
 
 static int32 DebugWeapoDrawing = 0;
 FAutoConsoleVariableRef CVARDebugWeapoDrawing(
@@ -27,13 +28,13 @@ ASWeapon::ASWeapon()
 
 	MuzzleSocketName = "MuzzleSocket";
 	TracerTargetName = "BeamEnd";
-}
 
-// Called when the game starts or when spawned
-void ASWeapon::BeginPlay()
-{
-	Super::BeginPlay();
-	
+	//static ConstructorHelpers::FObjectFinder<UBlueprint> WeaponBlueprint(TEXT("Blueprint'/Game/Blueprints/BP_Rifle.BP_Rifle_C''"));
+	//if (WeaponBlueprint.Object)
+	//{
+		//CurrentWeaponBlueprint = (UClass*)WeaponBlueprint.Object->GeneratedClass;		
+		//CurrentWeaponBlueprint = (UClass*)WeaponBlueprint.Object;
+	//}
 }
 
 void ASWeapon::Fire()
@@ -71,10 +72,15 @@ void ASWeapon::Fire()
 	{
 		DrawDebugLine(GetWorld(), OutEyeLocation, TraceEnd, FColor::White, false, 1.0f, 0, 1.0f);
 	}	
-	if(MuzzleEffect)
+	PlayFireEffects(TraceEnd);
+}
+
+void ASWeapon::PlayFireEffects(const FVector& TraceEnd)
+{
+	if (MuzzleEffect)
 	{
 		UGameplayStatics::SpawnEmitterAttached(MuzzleEffect, MeshComp, MuzzleSocketName);
-	}	
+	}
 	if (TracerEffect)
 	{
 		FVector MuzzleLocation = MeshComp->GetSocketLocation(MuzzleSocketName);
@@ -84,12 +90,5 @@ void ASWeapon::Fire()
 			TracerComp->SetVectorParameter(TracerTargetName, TraceEnd);
 		}
 	}
-	
 }
 
-// Called every frame
-void ASWeapon::Tick(float DeltaTime)
-{
-	Super::Tick(DeltaTime);
-
-}

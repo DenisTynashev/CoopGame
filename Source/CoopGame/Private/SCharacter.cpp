@@ -7,6 +7,7 @@
 #include "GameFramework/SpringArmComponent.h"
 #include "GameFramework/PawnMovementComponent.h"
 #include "Engine/World.h"
+#include "SWeapon.h"
 
 // Sets default values
 ASCharacter::ASCharacter()
@@ -22,10 +23,7 @@ ASCharacter::ASCharacter()
 	GetMovementComponent()->GetNavAgentPropertiesRef().bCanCrouch = true;
 	GetMovementComponent()->GetNavAgentPropertiesRef().bCanJump = true;
 	GetMovementComponent()->SetJumpAllowed(true);
-	//Spawn default weapon
-	//FVector NewLocation = GetActorLocation();
-	//CurrentWeapon = GetWorld()->SpawnActor<ASWeapon>(GetClass(), NewLocation, FRotator::ZeroRotator);
-	//CurrentWeapon
+	WeaponSocketName = "WeaponSocket";	
 	ZoomedFOV = 65.f;
 	ZoomInterpSpeed = 20.f;
 }
@@ -36,6 +34,19 @@ void ASCharacter::BeginPlay()
 	Super::BeginPlay();
 	
 	DeafaultFOV = CameraComp->FieldOfView;
+	//Spawn default weapon	
+	//CurrentWeaponBP = GetWorld()->SpawnActor<ASWeapon>(ASWeapon::StaticClass(), NewLocation, FRotator::ZeroRotator);	
+	FActorSpawnParameters SpawnParameters;
+	SpawnParameters.SpawnCollisionHandlingOverride = ESpawnActorCollisionHandlingMethod::AlwaysSpawn;
+	CurrentWeapon = GetWorld()->SpawnActor<ASWeapon>(StarterWeaponClass, FVector::ZeroVector, FRotator::ZeroRotator, SpawnParameters);
+
+	if (CurrentWeapon)
+	{
+		UE_LOG(LogTemp, Warning, TEXT("Current Weapon Spawning"));
+		CurrentWeapon->SetOwner(this);		
+		WeaponSocketName = "WeaponSocket";	
+		CurrentWeapon->AttachToComponent(this->GetMesh(), FAttachmentTransformRules::SnapToTargetNotIncludingScale, WeaponSocketName);
+	}
 	
 }
 
@@ -67,6 +78,8 @@ void ASCharacter::DoJump()
 void ASCharacter::ChangeWeapon()
 {
 	UE_LOG(LogTemp, Warning, TEXT("Change Weapon!"));
+	if (!CurrentWeapon) { return; }
+	CurrentWeapon->Destroy();
 }
 
 void ASCharacter::BeginZoom()
@@ -77,6 +90,14 @@ void ASCharacter::BeginZoom()
 void ASCharacter::EndZoom()
 {
 	bWantsToZoom = false;
+}
+
+void ASCharacter::StartFire()
+{
+	UE_LOG(LogTemp, Warning, TEXT("Start Fire!"));
+	if (!CurrentWeapon) { return; }
+	UE_LOG(LogTemp, Warning, TEXT("Fire!"));
+	CurrentWeapon->Fire();
 }
 
 // Called every frame
@@ -105,6 +126,8 @@ void ASCharacter::SetupPlayerInputComponent(UInputComponent* PlayerInputComponen
 	PlayerInputComponent->BindAction("Jump", EInputEvent::IE_Pressed, this, &ASCharacter::DoJump);
 
 	PlayerInputComponent->BindAction("ChangeWeapon", EInputEvent::IE_Pressed, this, &ASCharacter::ChangeWeapon);
+
+	PlayerInputComponent->BindAction("Fire", EInputEvent::IE_Pressed, this, &ASCharacter::StartFire);
 
 	PlayerInputComponent->BindAction("Zoom", EInputEvent::IE_Pressed, this, &ASCharacter::BeginZoom);
 	PlayerInputComponent->BindAction("Zoom", EInputEvent::IE_Released, this, &ASCharacter::EndZoom);

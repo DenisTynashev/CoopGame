@@ -41,8 +41,11 @@ protected:
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Components")
 	USpringArmComponent* SpringArmComp;
 
-	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "Weapon")
-	TSubclassOf<ASWeapon> CurrentWeapon;
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Weapon")
+	ASWeapon* CurrentWeapon;
+
+	UPROPERTY(EditDefaultsOnly, Category = "Player")
+	TSubclassOf<ASWeapon> StarterWeaponClass;
 
 	bool bWantsToZoom;
 	
@@ -57,7 +60,11 @@ protected:
 	void BeginZoom();
 
 	void EndZoom();
+
+	void StartFire();
 	
+	UPROPERTY(VisibleDefaultsOnly, Category = "Player")
+	FName WeaponSocketName;
 
 public:	
 	// Called every frame
