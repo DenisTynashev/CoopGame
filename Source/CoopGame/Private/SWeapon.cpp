@@ -9,6 +9,8 @@
 #include "Particles/ParticleSystemComponent.h"
 #include "IConsoleManager.h"
 #include "UObject/ConstructorHelpers.h"
+#include "PhysicalMaterials/PhysicalMaterial.h"
+#include "CoopGame.h"
 
 static int32 DebugWeapoDrawing = 0;
 FAutoConsoleVariableRef CVARDebugWeapoDrawing(
@@ -53,6 +55,7 @@ void ASWeapon::Fire()
 	QueryParams.AddIgnoredActor(MyOwner);
 	QueryParams.AddIgnoredActor(this);
 	QueryParams.bTraceComplex = true;
+	QueryParams.bReturnPhysicalMaterial = true;
 
 	//
 	FVector TracerEndPoint = TraceEnd;
@@ -61,13 +64,25 @@ void ASWeapon::Fire()
 	if (GetWorld()->LineTraceSingleByChannel(Hit, OutEyeLocation, TraceEnd, ECollisionChannel::ECC_Visibility, QueryParams))
 	{
 		AActor* HitActor = Hit.GetActor();
-		UGameplayStatics::ApplyPointDamage(HitActor, 20.0f, ShotDirection, Hit, MyOwner->GetInstigatorController(), this, DamageType);
-		if (ImpactEffect)
+		UGameplayStatics::ApplyPointDamage(HitActor, 20.0f, ShotDirection, Hit, MyOwner->GetInstigatorController(), this, DamageType);			
+		EPhysicalSurface SurfaceType = UPhysicalMaterial::DetermineSurfaceType(Hit.PhysMaterial.Get());
+		UParticleSystem* SelectedEffect = DefaultImpactEffect;
+		switch (SurfaceType)
 		{
-			UGameplayStatics::SpawnEmitterAtLocation(GetWorld(), ImpactEffect, Hit.ImpactPoint, Hit.ImpactNormal.Rotation());
-		}		
+			case SURFACE_FLESHDEAFAULT:
+				SelectedEffect = FleshImpactEffect;
+				break;
+			case SURFACE_FLESHVULNERABLE:
+				SelectedEffect = FleshImpactEffect;
+				break;
+		}
+		if (SelectedEffect)
+		{
+			UGameplayStatics::SpawnEmitterAtLocation(GetWorld(), SelectedEffect, Hit.ImpactPoint, Hit.ImpactNormal.Rotation());
+		}
 		TraceEnd = Hit.ImpactPoint;
 	}
+	
 	if (DebugWeapoDrawing)
 	{
 		DrawDebugLine(GetWorld(), OutEyeLocation, TraceEnd, FColor::White, false, 1.0f, 0, 1.0f);
