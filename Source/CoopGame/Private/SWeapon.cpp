@@ -61,7 +61,7 @@ void ASWeapon::Fire()
 	FVector TracerEndPoint = TraceEnd;
 
 	FHitResult Hit;
-	if (GetWorld()->LineTraceSingleByChannel(Hit, OutEyeLocation, TraceEnd, ECollisionChannel::ECC_Visibility, QueryParams))
+	if (GetWorld()->LineTraceSingleByChannel(Hit, OutEyeLocation, TraceEnd, ECollisionChannel::COLLISION_WEAPON, QueryParams))
 	{
 		AActor* HitActor = Hit.GetActor();
 		UGameplayStatics::ApplyPointDamage(HitActor, 20.0f, ShotDirection, Hit, MyOwner->GetInstigatorController(), this, DamageType);			
