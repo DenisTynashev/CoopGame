@@ -37,6 +37,7 @@ ASWeapon::ASWeapon()
 		//CurrentWeaponBlueprint = (UClass*)WeaponBlueprint.Object->GeneratedClass;		
 		//CurrentWeaponBlueprint = (UClass*)WeaponBlueprint.Object;
 	//}
+	BaseDamage = 20;
 }
 
 void ASWeapon::Fire()
@@ -64,8 +65,14 @@ void ASWeapon::Fire()
 	if (GetWorld()->LineTraceSingleByChannel(Hit, OutEyeLocation, TraceEnd, ECollisionChannel::COLLISION_WEAPON, QueryParams))
 	{
 		AActor* HitActor = Hit.GetActor();
-		UGameplayStatics::ApplyPointDamage(HitActor, 20.0f, ShotDirection, Hit, MyOwner->GetInstigatorController(), this, DamageType);			
+		float ActualDamage = BaseDamage;
 		EPhysicalSurface SurfaceType = UPhysicalMaterial::DetermineSurfaceType(Hit.PhysMaterial.Get());
+		if (SurfaceType == SURFACE_FLESHVULNERABLE)
+		{
+			ActualDamage *= 2.5f;
+		}
+		UGameplayStatics::ApplyPointDamage(HitActor, ActualDamage, ShotDirection, Hit, MyOwner->GetInstigatorController(), this, DamageType);			
+		
 		UParticleSystem* SelectedEffect = DefaultImpactEffect;
 		switch (SurfaceType)
 		{
