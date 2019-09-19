@@ -11,6 +11,7 @@
 #include "UObject/ConstructorHelpers.h"
 #include "PhysicalMaterials/PhysicalMaterial.h"
 #include "CoopGame.h"
+#include "TimerManager.h"
 
 static int32 DebugWeapoDrawing = 0;
 FAutoConsoleVariableRef CVARDebugWeapoDrawing(
@@ -38,6 +39,13 @@ ASWeapon::ASWeapon()
 		//CurrentWeaponBlueprint = (UClass*)WeaponBlueprint.Object;
 	//}
 	BaseDamage = 20;
+	RateOfFire = 600;
+}
+
+void ASWeapon::BeginPlay()
+{
+	Super::BeginPlay();
+	TimeBetweenShots = 60 / RateOfFire;
 }
 
 void ASWeapon::Fire()
@@ -95,6 +103,19 @@ void ASWeapon::Fire()
 		DrawDebugLine(GetWorld(), OutEyeLocation, TraceEnd, FColor::White, false, 1.0f, 0, 1.0f);
 	}	
 	PlayFireEffects(TraceEnd);
+	LastFireTime = GetWorld()->TimeSeconds;
+}
+
+void ASWeapon::StartFire()
+{
+	float FirstDelay = FMath::Max(LastFireTime + TimeBetweenShots - GetWorld()->TimeSeconds, 0.0f);
+	
+	GetWorldTimerManager().SetTimer(TimerHandle_TimeBetweenShoots, this, &ASWeapon::Fire, TimeBetweenShots, true, FirstDelay);
+}
+
+void ASWeapon::StopFire()
+{
+	GetWorldTimerManager().ClearTimer(TimerHandle_TimeBetweenShoots);
 }
 
 void ASWeapon::PlayFireEffects(const FVector& TraceEnd)

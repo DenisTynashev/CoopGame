@@ -96,8 +96,13 @@ void ASCharacter::StartFire()
 {
 	UE_LOG(LogTemp, Warning, TEXT("Start Fire!"));
 	if (!CurrentWeapon) { return; }
-	UE_LOG(LogTemp, Warning, TEXT("Fire!"));
-	CurrentWeapon->Fire();
+	CurrentWeapon->StartFire();
+}
+
+void ASCharacter::StopFire()
+{
+	if (!CurrentWeapon) { return; }
+	CurrentWeapon->StopFire();
 }
 
 // Called every frame
@@ -128,6 +133,7 @@ void ASCharacter::SetupPlayerInputComponent(UInputComponent* PlayerInputComponen
 	PlayerInputComponent->BindAction("ChangeWeapon", EInputEvent::IE_Pressed, this, &ASCharacter::ChangeWeapon);
 
 	PlayerInputComponent->BindAction("Fire", EInputEvent::IE_Pressed, this, &ASCharacter::StartFire);
+	PlayerInputComponent->BindAction("Fire", EInputEvent::IE_Released, this, &ASCharacter::StopFire);
 
 	PlayerInputComponent->BindAction("Zoom", EInputEvent::IE_Pressed, this, &ASCharacter::BeginZoom);
 	PlayerInputComponent->BindAction("Zoom", EInputEvent::IE_Released, this, &ASCharacter::EndZoom);

@@ -62,6 +62,8 @@ protected:
 	void EndZoom();
 
 	void StartFire();
+
+	void StopFire();
 	
 	UPROPERTY(VisibleDefaultsOnly, Category = "Player")
 	FName WeaponSocketName;
