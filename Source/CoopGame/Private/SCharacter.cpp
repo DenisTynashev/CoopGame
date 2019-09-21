@@ -8,6 +8,8 @@
 #include "GameFramework/PawnMovementComponent.h"
 #include "Engine/World.h"
 #include "SWeapon.h"
+#include "Components/CapsuleComponent.h"
+#include "CoopGame.h"
 
 // Sets default values
 ASCharacter::ASCharacter()
@@ -23,6 +25,9 @@ ASCharacter::ASCharacter()
 	GetMovementComponent()->GetNavAgentPropertiesRef().bCanCrouch = true;
 	GetMovementComponent()->GetNavAgentPropertiesRef().bCanJump = true;
 	GetMovementComponent()->SetJumpAllowed(true);
+
+	GetCapsuleComponent()->SetCollisionResponseToChannel(COLLISION_WEAPON, ECollisionResponse::ECR_Ignore);
+
 	WeaponSocketName = "WeaponSocket";	
 	ZoomedFOV = 65.f;
 	ZoomInterpSpeed = 20.f;
