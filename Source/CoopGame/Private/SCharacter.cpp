@@ -10,6 +10,7 @@
 #include "SWeapon.h"
 #include "Components/CapsuleComponent.h"
 #include "CoopGame.h"
+#include "..\Public\Components\SHealthComponent.h"
 
 // Sets default values
 ASCharacter::ASCharacter()
@@ -22,6 +23,8 @@ ASCharacter::ASCharacter()
 	SpringArmComp->bUsePawnControlRotation = true;
 	CameraComp->AttachToComponent(SpringArmComp, FAttachmentTransformRules::KeepRelativeTransform);
 
+	HealthComp = CreateDefaultSubobject<USHealthComponent>(TEXT("HealtComp"));
+
 	GetMovementComponent()->GetNavAgentPropertiesRef().bCanCrouch = true;
 	GetMovementComponent()->GetNavAgentPropertiesRef().bCanJump = true;
 	GetMovementComponent()->SetJumpAllowed(true);
@@ -31,6 +34,7 @@ ASCharacter::ASCharacter()
 	WeaponSocketName = "WeaponSocket";	
 	ZoomedFOV = 65.f;
 	ZoomInterpSpeed = 20.f;
+	bDied = false;
 }
 
 // Called when the game starts or when spawned
@@ -52,7 +56,7 @@ void ASCharacter::BeginPlay()
 		WeaponSocketName = "WeaponSocket";	
 		CurrentWeapon->AttachToComponent(this->GetMesh(), FAttachmentTransformRules::SnapToTargetNotIncludingScale, WeaponSocketName);
 	}
-	
+	HealthComp->OnHealthChanged.AddDynamic(this, &ASCharacter::OnHealthChanged);
 }
 
 void ASCharacter::MoveForward(float Value)
@@ -108,6 +112,21 @@ void ASCharacter::StopFire()
 {
 	if (!CurrentWeapon) { return; }
 	CurrentWeapon->StopFire();
+}
+
+void ASCharacter::OnHealthChanged(USHealthComponent* ChangedHealthComp, float Health, float HealthDelta, const UDamageType* DamageType, AController* InstigatedBy, AActor* DamageCauser)
+{
+	if (Health <= 0.0f && !bDied)
+	{
+		//Die
+		GetMovementComponent()->StopMovementImmediately();
+		GetCapsuleComponent()->SetCollisionEnabled(ECollisionEnabled::NoCollision);
+
+		DetachFromControllerPendingDestroy();
+		SetLifeSpan(10.0);
+
+		bDied = true;
+	}
 }
 
 // Called every frame
