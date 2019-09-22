@@ -109,6 +109,8 @@ void ASWeapon::Fire()
 void ASWeapon::StartFire()
 {
 	float FirstDelay = FMath::Max(LastFireTime + TimeBetweenShots - GetWorld()->TimeSeconds, 0.0f);
+
+	UE_LOG(LogTemp, Warning, TEXT("Weapon starts Fire!"));
 	
 	GetWorldTimerManager().SetTimer(TimerHandle_TimeBetweenShoots, this, &ASWeapon::Fire, TimeBetweenShots, true, FirstDelay);
 }

@@ -103,7 +103,7 @@ void ASCharacter::EndZoom()
 
 void ASCharacter::StartFire()
 {
-	UE_LOG(LogTemp, Warning, TEXT("Start Fire!"));
+	UE_LOG(LogTemp, Warning, TEXT("Character starts Fire!"));
 	if (!CurrentWeapon) { return; }
 	CurrentWeapon->StartFire();
 }
