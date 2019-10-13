@@ -29,8 +29,8 @@ ADamagableObject::ADamagableObject()
 	ExplosionImpulseStrength = 30000.0f;
 	VectorImpulseZ = 500.0f;
 	bDestroyed = false;
-	//SetReplicates(true);
-	//SetReplicateMovement(true);
+	SetReplicates(true);
+	SetReplicateMovement(true);
 }
 
 // Called when the game starts or when spawned
@@ -52,21 +52,33 @@ void ADamagableObject::OnHealthChanged(USHealthComponent* ChangedHealthComp, flo
 	{
 		//destroy
 		bDestroyed = true;
-		//OnRep_Exploded();
+		OnRep_Exploded();
 		UE_LOG(LogTemp, Warning, TEXT("Destroyed"));
 		ExplosionComp->FireImpulse();
-		if (ExplosionEffect)
+		/*if (ExplosionEffect)
 		{
 			UGameplayStatics::SpawnEmitterAtLocation(GetWorld(), ExplosionEffect, GetActorLocation(), GetActorRotation());
 		}
 		if (MaterialAfterExplosion)
 		{
 			Mesh->SetMaterial(0, MaterialAfterExplosion);
-		}
+		}*/
 		FVector Upwards = { 0.0f,0.0f,VectorImpulseZ};
 		//UPrimitiveComponent* Barrel = Cast<UPrimitiveComponent>(Mesh);
 		Mesh->AddImpulse(Upwards, FName ("NONE"), true);
 		
+	}
+}
+
+void ADamagableObject::OnRep_Exploded()
+{
+	//if (ExplosionEffect)
+	{
+		UGameplayStatics::SpawnEmitterAtLocation(GetWorld(), ExplosionEffect, GetActorLocation(), GetActorRotation());
+	}
+	//if (MaterialAfterExplosion)
+	{
+		Mesh->SetMaterial(0, MaterialAfterExplosion);
 	}
 }
 
@@ -77,11 +89,10 @@ void ADamagableObject::Tick(float DeltaTime)
 
 }
 
-/*
+
 void ADamagableObject::GetLifetimeReplicatedProps(TArray< FLifetimeProperty >& OutLifetimeProps) const
 {
 	Super::GetLifetimeReplicatedProps(OutLifetimeProps);
 
 	DOREPLIFETIME(ADamagableObject, bDestroyed);
 }
-*/

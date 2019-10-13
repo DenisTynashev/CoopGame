@@ -30,9 +30,12 @@ protected:
 	void OnHealthChanged(USHealthComponent* ChangedHealthComp, float Health, float HealthDelta, const class UDamageType* DamageType, class AController* InstigatedBy, AActor* DamageCauser);
 
 	/*already destroyed*/
-	//UPROPERTY(ReplicatedUsing=OnRepExploded, BlueprintReadOnly, Category = "Player")
-	UPROPERTY(BlueprintReadOnly, Category = "Player")
+	UPROPERTY(ReplicatedUsing=OnRep_Exploded)
+    //UPROPERTY(BlueprintReadOnly, Category = "Player")
 	bool bDestroyed;
+
+	UFUNCTION()
+	void OnRep_Exploded();
 
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Components")
 	UStaticMeshComponent* Mesh;
