@@ -7,6 +7,7 @@
 #include "Particles/ParticleSystemComponent.h"
 #include "Kismet/GameplayStatics.h"
 #include "Components/StaticMeshComponent.h"
+#include "Net/UnrealNetwork.h"
 
 // Sets default values
 ADamagableObject::ADamagableObject()
@@ -15,29 +16,34 @@ ADamagableObject::ADamagableObject()
 	PrimaryActorTick.bCanEverTick = true;
 
 	HealthComp = CreateDefaultSubobject<USHealthComponent>(TEXT("HealtComp"));
+	
 	Mesh = CreateDefaultSubobject<UStaticMeshComponent>(TEXT("Mesh"));
+	Mesh->SetSimulatePhysics(true);
+	Mesh->SetCollisionObjectType(ECC_PhysicsBody);
 	SetRootComponent(Mesh);
 
 	ExplosionComp = CreateDefaultSubobject<URadialForceComponent>(TEXT("ExplosionComp"));
 	ExplosionComp->AddCollisionChannelToAffect(ECollisionChannel::ECC_PhysicsBody);
+	ExplosionComp->SetupAttachment(Mesh);
 	Radius = 1000.0f;
-	ImpulseStrength = 30000.0f;
+	ExplosionImpulseStrength = 30000.0f;
+	VectorImpulseZ = 500.0f;
 	bDestroyed = false;
-
+	//SetReplicates(true);
+	//SetReplicateMovement(true);
 }
 
 // Called when the game starts or when spawned
 void ADamagableObject::BeginPlay()
 {
 	Super::BeginPlay();
+
 	ExplosionComp->Radius = Radius;
-	ExplosionComp->ImpulseStrength = ImpulseStrength;
+	ExplosionComp->ImpulseStrength = ExplosionImpulseStrength;
 	ExplosionComp->ForceStrength = 0.0f;
 	ExplosionComp->bImpulseVelChange = false;
 	ExplosionComp->bIgnoreOwningActor = true;
-
 	HealthComp->OnHealthChanged.AddDynamic(this, &ADamagableObject::OnHealthChanged);
-	
 }
 
 void ADamagableObject::OnHealthChanged(USHealthComponent* ChangedHealthComp, float Health, float HealthDelta, const UDamageType* DamageType, AController* InstigatedBy, AActor* DamageCauser)
@@ -46,6 +52,7 @@ void ADamagableObject::OnHealthChanged(USHealthComponent* ChangedHealthComp, flo
 	{
 		//destroy
 		bDestroyed = true;
+		//OnRep_Exploded();
 		UE_LOG(LogTemp, Warning, TEXT("Destroyed"));
 		ExplosionComp->FireImpulse();
 		if (ExplosionEffect)
@@ -56,7 +63,7 @@ void ADamagableObject::OnHealthChanged(USHealthComponent* ChangedHealthComp, flo
 		{
 			Mesh->SetMaterial(0, MaterialAfterExplosion);
 		}
-		FVector Upwards = { 0.0f,0.0f,500.0f };
+		FVector Upwards = { 0.0f,0.0f,VectorImpulseZ};
 		//UPrimitiveComponent* Barrel = Cast<UPrimitiveComponent>(Mesh);
 		Mesh->AddImpulse(Upwards, FName ("NONE"), true);
 		
@@ -70,3 +77,11 @@ void ADamagableObject::Tick(float DeltaTime)
 
 }
 
+/*
+void ADamagableObject::GetLifetimeReplicatedProps(TArray< FLifetimeProperty >& OutLifetimeProps) const
+{
+	Super::GetLifetimeReplicatedProps(OutLifetimeProps);
+
+	DOREPLIFETIME(ADamagableObject, bDestroyed);
+}
+*/

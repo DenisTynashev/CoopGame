@@ -11,6 +11,7 @@
 #include "Components/CapsuleComponent.h"
 #include "CoopGame.h"
 #include "..\Public\Components\SHealthComponent.h"
+#include "Net/UnrealNetwork.h"
 
 // Sets default values
 ASCharacter::ASCharacter()
@@ -42,21 +43,24 @@ void ASCharacter::BeginPlay()
 {
 	Super::BeginPlay();
 	
-	DeafaultFOV = CameraComp->FieldOfView;
-	//Spawn default weapon	
-	//CurrentWeaponBP = GetWorld()->SpawnActor<ASWeapon>(ASWeapon::StaticClass(), NewLocation, FRotator::ZeroRotator);	
-	FActorSpawnParameters SpawnParameters;
-	SpawnParameters.SpawnCollisionHandlingOverride = ESpawnActorCollisionHandlingMethod::AlwaysSpawn;
-	CurrentWeapon = GetWorld()->SpawnActor<ASWeapon>(StarterWeaponClass, FVector::ZeroVector, FRotator::ZeroRotator, SpawnParameters);
-
-	if (CurrentWeapon)
-	{
-		UE_LOG(LogTemp, Warning, TEXT("Current Weapon Spawning"));
-		CurrentWeapon->SetOwner(this);		
-		WeaponSocketName = "WeaponSocket";	
-		CurrentWeapon->AttachToComponent(this->GetMesh(), FAttachmentTransformRules::SnapToTargetNotIncludingScale, WeaponSocketName);
-	}
+	DeafaultFOV = CameraComp->FieldOfView;	
 	HealthComp->OnHealthChanged.AddDynamic(this, &ASCharacter::OnHealthChanged);
+
+	if (Role == ROLE_Authority)
+	{
+		//Spawn default weapon	
+		FActorSpawnParameters SpawnParameters;
+		SpawnParameters.SpawnCollisionHandlingOverride = ESpawnActorCollisionHandlingMethod::AlwaysSpawn;
+		CurrentWeapon = GetWorld()->SpawnActor<ASWeapon>(StarterWeaponClass, FVector::ZeroVector, FRotator::ZeroRotator, SpawnParameters);
+
+		if (CurrentWeapon)
+		{
+			UE_LOG(LogTemp, Warning, TEXT("Current Weapon Spawning"));
+			CurrentWeapon->SetOwner(this);
+			WeaponSocketName = "WeaponSocket";
+			CurrentWeapon->AttachToComponent(this->GetMesh(), FAttachmentTransformRules::SnapToTargetNotIncludingScale, WeaponSocketName);
+		}
+	}	
 }
 
 void ASCharacter::MoveForward(float Value)
@@ -173,3 +177,10 @@ FVector ASCharacter::GetPawnViewLocation() const
 	return Super::GetPawnViewLocation();
 }
 
+void ASCharacter::GetLifetimeReplicatedProps(TArray< FLifetimeProperty >& OutLifetimeProps) const
+{
+	Super::GetLifetimeReplicatedProps(OutLifetimeProps);
+
+	DOREPLIFETIME(ASCharacter, CurrentWeapon);
+	DOREPLIFETIME(ASCharacter, bDied);
+}

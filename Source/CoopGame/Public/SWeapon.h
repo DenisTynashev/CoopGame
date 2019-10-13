@@ -6,6 +6,18 @@
 #include "GameFramework/Actor.h"
 #include "SWeapon.generated.h"
 
+//Contains information of a single hitscan weapon interface
+USTRUCT()
+struct FHitScanTrace
+{
+	GENERATED_BODY()
+
+	UPROPERTY()
+	TEnumAsByte	<EPhysicalSurface> SurfaceType;
+
+	UPROPERTY()
+	FVector_NetQuantize TraceTo;
+};
 
 
 UCLASS()
@@ -53,7 +65,12 @@ protected:
 	UPROPERTY(EditDefaultsOnly, Category = "Weapon")
 	float BaseDamage;
 
+	UFUNCTION(Server, Reliable, WithValidation)
+	void ServerFire();
+
 	virtual void Fire();
+
+	void PlayImpactEffects(EPhysicalSurface SurfaceType, FVector ImpactPoint);
 
 	FTimerHandle TimerHandle_TimeBetweenShoots;
 
@@ -64,6 +81,12 @@ protected:
 	/*Bullets per minute fired*/
 	UPROPERTY(EditDefaultsOnly, Category = "Weapon")
 	float RateOfFire;
+
+	UPROPERTY(ReplicatedUsing = OnRep_HitScanTrace)
+	FHitScanTrace HitScanTrace;
+
+	UFUNCTION()
+	void OnRep_HitScanTrace();
 
 public:	
 	

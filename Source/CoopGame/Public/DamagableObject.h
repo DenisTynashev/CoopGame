@@ -30,6 +30,7 @@ protected:
 	void OnHealthChanged(USHealthComponent* ChangedHealthComp, float Health, float HealthDelta, const class UDamageType* DamageType, class AController* InstigatedBy, AActor* DamageCauser);
 
 	/*already destroyed*/
+	//UPROPERTY(ReplicatedUsing=OnRepExploded, BlueprintReadOnly, Category = "Player")
 	UPROPERTY(BlueprintReadOnly, Category = "Player")
 	bool bDestroyed;
 
@@ -37,19 +38,23 @@ protected:
 	UStaticMeshComponent* Mesh;
 
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Components")
-		URadialForceComponent* ExplosionComp;
+	URadialForceComponent* ExplosionComp;
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Explosion")
-	float ImpulseStrength;
+	float ExplosionImpulseStrength;
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Explosion")
 	float Radius;
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Explosion")
+	float VectorImpulseZ;
 
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "Explosion")
 	UParticleSystem* ExplosionEffect;
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Explosion")
 	UMaterialInterface* MaterialAfterExplosion;
+
 
 public:	
 	// Called every frame
